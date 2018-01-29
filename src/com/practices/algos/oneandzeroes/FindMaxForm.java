@@ -1,50 +1,60 @@
 package com.practices.algos.oneandzeroes;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FindMaxForm {
 
-    private int max = Integer.MIN_VALUE;
+    private int max = 0;
 
     public int findMaxForm(String[] strs, int m, int n) {
         List<String> list = new ArrayList<>();
-        return findMaxFormUtil(strs, m, n, 0, list);
+        List<Integer> indexes = new ArrayList<>();
+        return findMaxFormUtil(strs, m, n, 0, list, indexes);
     }
 
-    private int findMaxFormUtil(String[] strs, int m, int n, int index, List<String> list) {
+    private int findMaxFormUtil(String[] strs, int m, int n, int index, List<String> list, List<Integer> indexes) {
         int length = strs.length;
-        for(int i = index; i < length; i++) {
-            int k = strs[i].length();
-            int M = m, N = n;
-            for(int j = 0; j < strs[i].length() && strs[i].length() <= M + N; j++) {
-                if(m > 0 && strs[i].charAt(j) == '0') {
-                    m--;
-                    k--;
-                }
-                if(n > 0 && strs[i].charAt(j) == '1') {
-                    n--;
-                    k--;
-                }
-            }
-
-            if(k == 0) list.add(strs[i]);
-            if(m+n == 0) {
-                max = Math.max(max, list.size());
-                return max;
-            }
-            if(m+n > 0) findMaxFormUtil(strs, m, n, index+1, list);
-            if(!list.isEmpty()) list.remove(list.size()-1);
+        if(index == strs.length) {
+            max = Math.max(max, list.size());
+            return max;
         }
+        else {
+            for(int i = index; i < length; i++) {
 
+                int n0 = count(strs[i], '0');
+                int n1 = count(strs[i], '1');
+
+                if(n0 <= m && n1 <= n && !indexes.contains(i)) {
+                    indexes.add(i);
+                    list.add(strs[i]);
+                    findMaxFormUtil(strs, m-n0, n-n1, index+1, list, indexes);
+                    list.remove(list.size()-1);
+                    indexes.remove(indexes.size()-1);
+                }
+            }
+        }
         return max;
+    }
+
+    private int count(String str, char ch) {
+        int count = 0;
+        for(int i = 0; i < str.length(); i++) {
+            if(str.charAt(i) == ch) count++;
+        }
+        return count;
     }
 
     public static void main(String[] args){
 
         FindMaxForm obj = new FindMaxForm();
-        String[] strs = {"10", "0001", "111001", "1", "0"};
-        System.out.println(obj.findMaxForm(strs, 5, 3));
+        String[] strs = {"0","11","1000","01","0","101","1",
+                         "1","1","0","0","0","0","1","0","0110101",
+                         "0","11","01","00","01111","0011","1","1000",
+                         "0","11101","1","0","10","0111"};
+        System.out.println(obj.findMaxForm(strs, 9, 80));
 
     }
 }
